@@ -73,6 +73,7 @@ class updateDatabase(object):
     def add_funds_to_db(self,
                         year=None,
                         party=None,
+                        party_state=None,
                         donor=None,
                         address=None,
                         state=None,
@@ -84,7 +85,7 @@ class updateDatabase(object):
         """
         if (donor is None) or (address is None) or (state is None) or\
             (postcode is None) or (don_type is None) or (amount is None)\
-                or (party is None) or (year is None):
+                or (party is None) or (year is None) or (party_state is None):
                 return False
         #Check inputs
         year = year.replace("'", '')
@@ -93,11 +94,13 @@ class updateDatabase(object):
         address = address.replace("'", '')
         don_type = don_type.replace("'", '')
         state = state.replace("'", '')
+        party_state = party_state.replace("'", '')
         msg = 'INSERT INTO %s(year, party,'\
-              'donor, address, state, postCode, donor_type, amount)'\
-              " VALUES('%s', '%s','%s','%s', '%s', '%s', '%s', %0.2f)" %\
+              'donor, address, state, postCode, donor_type, amount, '\
+              'party_state)'\
+              " VALUES('%s', '%s','%s','%s', '%s', '%s', '%s', %0.2f, '%s')" %\
               (SECONDARY_TABLE, year, party, donor, address, state,
-               postcode, don_type, amount)
+               postcode, don_type, amount, party_state)
         #try:
         self.execute_command(msg)
         #except:

@@ -30,11 +30,40 @@ from dataGetter import dataGetter, RAW_DATA
 from updateDatabase import updateDatabase
 import os
 import argparse
-import pdb
 import sys
+import re
+import pdb
 ##############################################################################
 
 CSV = '.csv'
+#regular expression search strings
+#the first string searches for the acronym of the state without any alphabet
+#characters on either side
+STATES = {'nsw': ['[^A-za-z]nsw[^A-za-z]',
+                  '[^A-za-z]n[\.,\-]s[\.,\-]w[^A-za-z]',
+                  'new south wales', ],
+          'qld': ['[^a-za-z]qld[^a-za-z]',
+                  '[^a-za-z]qld',
+                  '\[^A-za-z]q[\.,\-]l[\.,\-]d[^A-za-z]',
+                  'queensland', ],
+          'vic': ['[^a-za-z]vic[^a-za-z]',
+                  '\[^A-za-z]v[\.,\-]i[\.,\-]c[^A-za-z]',
+                  'victoria', ],
+          'sa': ['[^a-za-z]sa[^a-za-z]',
+                 '\[^A-za-z]s[\.,\-]a[^A-za-z]',
+                 'south australia', ],
+          'nt': ['[^a-za-z]nt[^a-za-z]',
+                 '\[^A-za-z]n[\.,\-]t[^A-za-z]',
+                 'northern territory', ],
+          'wa': ['[^a-za-z]wa[^a-za-z]',
+                 '\[^A-za-z]w[\.,\-]a[^A-za-z]',
+                 'western australia', ],
+          'act': ['[^a-za-z]act[^a-za-z]',
+                  '\[^A-za-z]a[\.,\-]c[\.,\-]t[^A-za-z]',
+                  'australian captial territory', ],
+          }
+
+FEDERAL = 'FED'
 
 if __name__ == "__main__":
     #Command line arguments
@@ -88,8 +117,26 @@ if __name__ == "__main__":
                     year = row.split(' ')
                     year = year[len(year) - 1][:4]
                     #print year
+                #The second row contains the name
                 elif (row_counter == 1):
                     party = row.split(',')[0]
+                    party_state = None
+                    #find the state
+                    #if party.find('Pauline') >=0:
+                    #    pdb.set_trace()
+                    test_party = party.lower().replace('.', '')
+                    for state in STATES.keys():
+                        for value in STATES[state]:
+                            if re.search(value, test_party):
+                                party_state = state
+                                break
+                            #if test_party.find(value) > 0:
+                            #    party_state = state
+                        if party_state is not None:
+                            break
+                    if party_state is None:
+                        party_state = FEDERAL
+                    print '%s\t%s\t\t:%s' % (party, test_party, party_state)
                 elif(row_counter == 2):
                     pass
                 #Handle data rows except for last blank lines
@@ -102,6 +149,7 @@ if __name__ == "__main__":
                             replace("'", '')
                     db.add_funds_to_db(year=year,
                                        party=party,
+                                       party_state=party_state,
                                        donor=extracted_data[0],
                                        address=extracted_data[1],
                                        state=extracted_data[3],
