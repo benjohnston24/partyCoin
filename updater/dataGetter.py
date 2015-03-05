@@ -6,18 +6,20 @@ File Name : dataGetter.py
 Purpose: This python module downloads the political party funding information
 available at the AEC website
 
+Updated: Thu Mar  5 19:26:17 AEDT 2015
 Created: 21-Feb-2015 08:31:36 AEDT
 -----------------------------------------------------------------------------
 Revision History
 
-
+Thu Mar  5 19:26:17 AEDT 2015: Version 1.0
+First Release
 
 -----------------------------------------------------------------------------
 S.D.G
 """
 __author__ = 'Ben Johnston'
 __revision__ = '1.0'
-__date__ = 'Tue Feb 24 20:58:22 AEDT 2015'
+__date__ = 'Thu Mar  5 19:27:26 AEDT 2015'
 __license__ = 'MPL v2.0'
 
 ## LICENSE DETAILS############################################################
@@ -44,6 +46,8 @@ __aec__ = "http://www.aec.gov.au"
 
 #Raw data location
 RAW_DATA = 'dat'
+#Log file extension
+FILE_EXT = '.csv'
 
 
 class dataGetter(object):

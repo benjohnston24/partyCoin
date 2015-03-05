@@ -6,9 +6,11 @@ File Name : updateDatabase.py
 Purpose: This module is used to read the data downloaded from the Australian
 electoral commission website and update the database accordingly
 
+Updated: Thu Mar  5 19:25:41 AEDT 2015
 Created: 24-Feb-2015 21:32:45 AEDT
 -----------------------------------------------------------------------------
 Revision History
+
 
 24-Feb-2015 21:32:45 AEDT: Version 0.1
 
@@ -20,7 +22,7 @@ S.D.G
 """
 __author__ = 'Ben Johnston'
 __revision__ = '0.1'
-__date__ = '24-Feb-2015 21:32:45 AEDT'
+__date__ = 'Thu Mar  5 19:25:56 AEDT 2015'
 __license__ = 'MPL v2.0'
 
 ## LICENSE DETAILS############################################################
@@ -29,9 +31,12 @@ __license__ = 'MPL v2.0'
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ##IMPORTS#####################################################################
-from dbConfig import HOST, USER, PWORD, DBASE, MAIN_TABLE, SECONDARY_TABLE
+from dbConfig import HOST, USER, PWORD, DBASE, MAIN_TABLE, SECONDARY_TABLE,\
+    STATES, FEDERAL
 from stdtoolbox.logging import logger
 import MySQLdb as mdb
+import re
+import os
 ##############################################################################
 
 
@@ -129,3 +134,77 @@ class updateDatabase(object):
         self.info_logger.info('to db: %s' % command)
         self.cur.execute(command)
         self.con.commit()
+
+    def import_data_from_dir(self, log_folder=None, file_extension=None):
+        """!
+        This method is used to import data from log files into the database
+        @param self The pointer for the object
+        @param log_folder The folder containing the log files to import
+        @param file_extension The file type to be imported
+        """
+        #Check the inputs are valid
+        if (log_folder is None) or (file_extension is None):
+            msg = 'log_folder and/or file_extension not supplied'
+            self.info_logger.info(msg)
+            return
+        #Walk through the collected file list
+        working_dir = os.path.join(os.getcwd(), log_folder)
+        file_list = os.listdir(working_dir)
+        counter = 0
+        for f in file_list:
+            #If the file is a csv file
+            if os.path.splitext(f)[1] == file_extension:
+                counter += 1
+                self.info_logger.info("Reading file %s" % f)
+                row_counter = 0
+                f_handle = open(os.path.join(working_dir, f), 'r')
+                data = f_handle.read().split(',\r\n')
+                #Process the data based on the row
+                for row in data:
+                    #Ensure the file acutally contains data
+                    if len(data) == 1:
+                        break
+                    #The first row contains the year
+                    if (row_counter == 0):
+                        year = row.split(' ')
+                        year = year[len(year) - 1][:4]
+                    #The second row contains the name
+                    elif (row_counter == 1):
+                        party = row.split(',')[0]
+                        party_state = None
+                        #find the state
+                        test_party = party.lower().replace('.', '')
+                        for state in STATES.keys():
+                            #Check which state the party is from
+                            if re.search(STATES[state], test_party):
+                                party_state = state
+                                break
+                            #If a state has been allocated, break the loop
+                            if party_state is not None:
+                                break
+                        #If a state has not been allocated default to FEDERAL
+                        #level
+                        if party_state is None:
+                            party_state = FEDERAL
+                    #Ignore the third row
+                    elif(row_counter == 2):
+                        pass
+                    #Handle data rows except for last blank lines
+                    elif (row != ''):
+                        extracted_data = row.split('","')
+                        #Remove existing quotation marks
+                        for i in range(len(extracted_data)):
+                            extracted_data[i] = \
+                                extracted_data[i].replace('"', '').\
+                                replace("'", '')
+                        self.add_funds_to_db(year=year,
+                                             party=party,
+                                             party_state=party_state,
+                                             donor=extracted_data[0],
+                                             address=extracted_data[1],
+                                             state=extracted_data[3],
+                                             postcode=extracted_data[4],
+                                             don_type=extracted_data[6],
+                                             amount=float(extracted_data[5]))
+                    row_counter += 1
+        self.replace_old_data()
