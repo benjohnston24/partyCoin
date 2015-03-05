@@ -113,12 +113,18 @@ class dataGetter(object):
         #Available years of data
         self.available_years = []
 
-    def launch_funds_getter(self):
+        #Check the directory to log folders exists
+
+    def launch_funds_getter(self, log_folder=RAW_DATA):
         """!
         This method is used to extract the data from the australian electorocal
         commision website for all parties for all available years.
         @param self The pointer for the object
         """
+        log_folder_path = os.path.join(os.getcwd(), log_folder)
+        if not os.path.exists(log_folder_path):
+            os.makedirs(log_folder_path)
+            self.info_logger.info('Created directory %s' % log_folder_path)
         self.get_available_years()
         for year_list in self.available_years:
             self.info_logger.info('Select data for year: %s' % year_list[0])
@@ -244,22 +250,3 @@ class dataGetter(object):
                                        replace(',', ''))
             donor_info.append(tmp_dict)
         return donor_info
-
-if __name__ == "__main__":
-    #Command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--debug', action='store_true',
-                        default=False, help="Enable debug mode")
-    parser.add_argument('-l', '--log', action='store_true',
-                        default=False, help="Enable debug logging")
-    args = parser.parse_args()
-
-    #Modify debug level as per user input
-    debug_level = 0
-    if args.debug:
-        debug_level = 1
-    if args.log:
-        debug_level = 2
-
-    analysis = dataGetter(debug_level=debug_level)
-    analysis.launch_funds_getter()

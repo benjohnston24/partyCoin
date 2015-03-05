@@ -148,7 +148,7 @@ class updateDatabase(object):
             self.info_logger.info(msg)
             return
         #Walk through the collected file list
-        working_dir = os.path.join(os.getcwd(), log_folder)
+        working_dir = log_folder
         file_list = os.listdir(working_dir)
         counter = 0
         for f in file_list:

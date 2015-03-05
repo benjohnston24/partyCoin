@@ -33,27 +33,24 @@ from dataGetter import dataGetter, RAW_DATA, FILE_EXT
 from updateDatabase import updateDatabase
 import argparse
 import sys
+import os
 ##############################################################################
 
-if __name__ == "__main__":
-    #Command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--debug', action='store_true',
-                        default=False, help="Enable debug mode")
-    parser.add_argument('-l', '--log', action='store_true',
-                        default=False, help="Enable debug logging")
-    parser.add_argument('-i', '--input_data', action='store_true',
-                        default=False, help="Import local data only")
-    args = parser.parse_args()
 
-    #Modify debug level as per user input
-    debug_level = 0
-    if args.debug:
-        debug_level = 1
-    if args.log:
-        debug_level = 2
-
-    if not args.input_data:
+def main(import_data_only=False, debug_level=0,
+         log_folder=RAW_DATA, file_extension=FILE_EXT):
+    """!
+    This method executes the program.  The instructions have been encapsulated
+    in a method to allow for calling from the command line
+    @param import_data_only A boolean flag to indicate if the data is only to
+    be imported from data files into the data base
+    @param debug_level A flag to indicate the debug level for the method.  0
+    indicates debugging is disabled, 1 indicates messages displayed through
+    stdout, 2 indicates debug messages are logged to info.log
+    @param log_folder The folder used to store the raw data files
+    @param file_extension The file extension of the files containing the data
+    """
+    if not import_data_only:
 
         #Get the data
         try:
@@ -69,10 +66,34 @@ if __name__ == "__main__":
         print "Unable to connect to database"
         sys.exit()
 
-    #Import the data from the log files
+    #Import Data
     try:
-        db.import_data_from_dir(log_folder=RAW_DATA,
+        db.import_data_from_dir(log_folder=os.path.join(os.getcwd(),
+                                                        log_folder),
                                 file_extension=FILE_EXT)
     except:
         print "Unable to import data to database"
         sys.exit()
+
+if __name__ == "__main__":
+    #Command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='store_true',
+                        default=False, help="Enable debug mode")
+    parser.add_argument('-l', '--log', action='store_true',
+                        default=False, help="Enable debug logging")
+    parser.add_argument('-i', '--import_data', action='store_true',
+                        default=False, help="Import local data only")
+    args = parser.parse_args()
+
+    #Modify debug level as per user input
+    debug_level = 0
+    if args.debug:
+        debug_level = 1
+    if args.log:
+        debug_level = 2
+
+    main(import_data_only=args.import_data,
+         debug_level=debug_level,
+         log_folder=RAW_DATA,
+         file_extension=FILE_EXT)
