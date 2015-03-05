@@ -8,6 +8,7 @@ class Donation(models.Model):
     party = models.CharField(max_length=200)
     donor = models.CharField(max_length=200)
     address = models.CharField(max_length=200)
+    party_state = models.CharField(max_length=4)
     state = models.CharField(max_length=3)
     postcode = models.CharField(max_length=4)
     donor_type = models.CharField(max_length=40)

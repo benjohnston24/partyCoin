@@ -39,28 +39,38 @@ CSV = '.csv'
 #regular expression search strings
 #the first string searches for the acronym of the state without any alphabet
 #characters on either side
-STATES = {'nsw': ['[^A-za-z]nsw[^A-za-z]',
-                  '[^A-za-z]n[\.,\-]s[\.,\-]w[^A-za-z]',
-                  'new south wales', ],
-          'qld': ['[^a-za-z]qld[^a-za-z]',
-                  '[^a-za-z]qld',
-                  '\[^A-za-z]q[\.,\-]l[\.,\-]d[^A-za-z]',
-                  'queensland', ],
-          'vic': ['[^a-za-z]vic[^a-za-z]',
-                  '\[^A-za-z]v[\.,\-]i[\.,\-]c[^A-za-z]',
-                  'victoria', ],
-          'sa': ['[^a-za-z]sa[^a-za-z]',
-                 '\[^A-za-z]s[\.,\-]a[^A-za-z]',
-                 'south australia', ],
-          'nt': ['[^a-za-z]nt[^a-za-z]',
-                 '\[^A-za-z]n[\.,\-]t[^A-za-z]',
-                 'northern territory', ],
-          'wa': ['[^a-za-z]wa[^a-za-z]',
-                 '\[^A-za-z]w[\.,\-]a[^A-za-z]',
-                 'western australia', ],
-          'act': ['[^a-za-z]act[^a-za-z]',
-                  '\[^A-za-z]a[\.,\-]c[\.,\-]t[^A-za-z]',
-                  'australian captial territory', ],
+STATES = {'nsw': '([^A-Za-z]nsw([^A-Za-z]|$))|'
+                 #'([^A-Za-z]nsw)|'
+                 '([^A-Za-z]n[\.,\-]s[\.,\-]w[^A-Za-z])|'
+                 '(new south wales)',
+          'qld': '([^A-Za-z]qld([^A-Za-z]|$))|'
+                 #'([^A-Za-z]qld)|'
+                 '(^A-Za-z]q[\.,\-]l[\.,\-]d[^A-Za-z])|'
+                 '(queensland)',
+          'vic': '([^A-Za-z]vic([^A-Za-z]|$))|'
+                 #'([^A-Za-z]vic)|'
+                 '([^A-Za-z]v[\.,\-]i[\.,\-]c[^A-Za-z])|'
+                 '(victoria)',
+          'sa': '([^A-Za-z]sa([^A-Za-z]|$))|'
+                 #'([^A-Za-z]sa)|'
+                '([^A-Za-z]s[\.,\-]a[^A-Za-z])|'
+                '(south australia)',
+          'nt': '([^A-Za-z]nt([^A-Za-z]|$))|'
+                 #'([^A-Za-z]nt)|'
+                '([^A-Za-z]n[\.,\-]t[^A-Za-z])|'
+                 '(northern territory)',
+          'wa': '([^A-Za-z]wa([^A-Za-z]|$))|'
+                 #'([^A-Za-z]wa)|'
+                '([^A-Za-z]w[\.,\-]a[^A-Za-z])|'
+                '(western australia)',
+          'act': '([^A-Za-z]act([^A-Za-z]|$))|'
+                 #'([^A-Za-z]act)|'
+                 '([^A-Za-z]a[\.,\-]c[\.,\-]t[^A-Za-z])|'
+                 '(australian captial territory)',
+          'tas': '([^A-Za-z]tas([^A-Za-z]|$))|'
+                 #'([^A-Za-z]tas)|'
+                 '([^A-Za-z]t[\.,\-]a[\.,\-]s[^A-Za-z])|'
+                 '(tasmania)',
           }
 
 FEDERAL = 'FED'
@@ -122,15 +132,15 @@ if __name__ == "__main__":
                     party = row.split(',')[0]
                     party_state = None
                     #find the state
-                    #if party.find('Pauline') >=0:
+                    #if party.find('Consandine') >=0:
                     #    pdb.set_trace()
                     test_party = party.lower().replace('.', '')
                     for state in STATES.keys():
-                        for value in STATES[state]:
-                            if re.search(value, test_party):
-                                party_state = state
-                                break
-                            #if test_party.find(value) > 0:
+                        #print STATES[state]
+                        if re.search(STATES[state], test_party):
+                            party_state = state
+                            break
+                        #if test_party.find(value) > 0:
                             #    party_state = state
                         if party_state is not None:
                             break

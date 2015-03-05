@@ -4,7 +4,7 @@
 {% if all_donations %}
     {% for donation in all_donations %}
     <tr>
-        <td>{{donation.year}}</td><td>{{donation.party}}</td><td>{{donation.donor}}</td><td>${{donation.amount}}</td>
+        <td>{{donation.year}}</td><td>{{donation.party}}</td><td>{{donation.donor}}</td><td>{{donation.party_state}}</td><td>${{donation.amount}}</td>
     </tr>
     {% endfor %} 
 {% endif %}
