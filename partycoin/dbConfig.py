@@ -26,47 +26,51 @@ __license__ = 'MPL v2.0'
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ##IMPORTS#####################################################################
-
+from stdtoolbox.logging import logger
+import MySQLdb as mdb
 ##############################################################################
 HOST = 'localhost'
 USER = 'partyCoin'
 PWORD = 'money'
 DBASE = 'donations'
-MAIN_TABLE = 'funds_tracker_donation'
-SECONDARY_TABLE = 'new_funds'
 
-#regular expression search strings
-#the first string searches for the acronym of the state without any alphabet
-#characters on either side
-#STATES is used to to determine in which state a given political party resides
-STATES = {'nsw': '([^A-Za-z]nsw([^A-Za-z]|$))|'
-                 '([^A-Za-z]n[\.,\-]s[\.,\-]w[^A-Za-z])|'
-                 '(new south wales)',
-          'qld': '([^A-Za-z]qld([^A-Za-z]|$))|'
-                 '(^A-Za-z]q[\.,\-]l[\.,\-]d[^A-Za-z])|'
-                 '(queensland)',
-          'vic': '([^A-Za-z]vic([^A-Za-z]|$))|'
-                 '([^A-Za-z]v[\.,\-]i[\.,\-]c[^A-Za-z])|'
-                 '(victoria)',
-          'sa': '([^A-Za-z]sa([^A-Za-z]|$))|'
-                '([^A-Za-z]s[\.,\-]a[^A-Za-z])|'
-                '(south australia)',
-          'nt': '([^A-Za-z]nt([^A-Za-z]|$))|'
-                '([^A-Za-z]n[\.,\-]t[^A-Za-z])|'
-                 '(northern territory)',
-          'wa': '([^A-Za-z]wa([^A-Za-z]|$))|'
-                '([^A-Za-z]w[\.,\-]a[^A-Za-z])|'
-                '(western australia)',
-          'act': '([^A-Za-z]act([^A-Za-z]|$))|'
-                 '([^A-Za-z]a[\.,\-]c[\.,\-]t[^A-Za-z])|'
-                 '(australian captial territory)',
-          'tas': '([^A-Za-z]tas([^A-Za-z]|$))|'
-                 '([^A-Za-z]t[\.,\-]a[\.,\-]s[^A-Za-z])|'
-                 '(tasmania)',
-          }
-
-#FEDERAL is used to indicate that a political party is a country wide
-#organisation
-FEDERAL = 'FED'
+#CLASSES#######################################################################
 
 
+class partyCoinDbase(object):
+    """!
+    This class forms the base class for connecting to the partyCoin database
+    and executing commands
+    """
+    def __init__(self, debug_level=0):
+        """!
+        The constructor for the object
+        @param self The pointer for the object
+        """
+        self.info_logger = logger('info.log', debug_level=debug_level)
+        self.connect_to_db()
+
+    def connect_to_db(self):
+        """!
+        This method connects to the mysql database using the parameters
+        specified within dbConfig.py
+        @param self The pointer for the object
+        """
+        self.con = mdb.connect(HOST, USER, PWORD, DBASE)
+        self.cur = self.con.cursor()
+
+    def execute_command(self, command):
+        """!
+        This method is used to execute sql commands and appropriately handling
+        logging of debug messages
+        """
+        self.info_logger.info('to db: %s' % command)
+        self.cur.execute(command)
+        self.con.commit()
+
+    def disconnect(self):
+        """!
+        This method disconnects the sql database connection
+        @param self The pointer for the object
+        """
+        self.con.close()

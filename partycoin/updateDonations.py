@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 """!
 -----------------------------------------------------------------------------
-File Name : updateDatabase.py
+File Name : updateDonations.py
 
 Purpose: This module is used to read the data downloaded from the Australian
 electoral commission website and update the database accordingly
@@ -11,18 +11,20 @@ Created: 24-Feb-2015 21:32:45 AEDT
 -----------------------------------------------------------------------------
 Revision History
 
+Wed Mar 11 15:36:29 AEDT 2015: Version 0.2
+*File renamed
+*updateDonations class re-configured to inherit partyCoinDbase class
 
 24-Feb-2015 21:32:45 AEDT: Version 0.1
-
-*Configured to work with Mysql database only
+*Configured to work with sql database only
 
 
 -----------------------------------------------------------------------------
 S.D.G
 """
 __author__ = 'Ben Johnston'
-__revision__ = '0.1'
-__date__ = 'Thu Mar  5 19:25:56 AEDT 2015'
+__revision__ = '0.2'
+__date__ = 'Wed Mar 11 15:36:17 AEDT 2015'
 __license__ = 'MPL v2.0'
 
 ## LICENSE DETAILS############################################################
@@ -31,16 +33,51 @@ __license__ = 'MPL v2.0'
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ##IMPORTS#####################################################################
-from dbConfig import HOST, USER, PWORD, DBASE, MAIN_TABLE, SECONDARY_TABLE,\
-    STATES, FEDERAL
-from stdtoolbox.logging import logger
-import MySQLdb as mdb
+from dbConfig import partyCoinDbase
 import re
 import os
 ##############################################################################
+#Tables used in tracking the donations made by the political parties
+MAIN_TABLE = 'funds_tracker_donation'
+SECONDARY_TABLE = 'new_funds'
+
+#regular expression search strings
+#the first string searches for the acronym of the state without any alphabet
+#characters on either side
+#STATES is used to to determine in which state a given political party resides
+STATES = {'nsw': '([^A-Za-z]nsw([^A-Za-z]|$))|'
+                 '([^A-Za-z]n[\.,\-]s[\.,\-]w[^A-Za-z])|'
+                 '(new south wales)',
+          'qld': '([^A-Za-z]qld([^A-Za-z]|$))|'
+                 '(^A-Za-z]q[\.,\-]l[\.,\-]d[^A-Za-z])|'
+                 '(queensland)',
+          'vic': '([^A-Za-z]vic([^A-Za-z]|$))|'
+                 '([^A-Za-z]v[\.,\-]i[\.,\-]c[^A-Za-z])|' '(victoria)', 
+          'sa': '([^A-Za-z]sa([^A-Za-z]|$))|'
+                '([^A-Za-z]s[\.,\-]a[^A-Za-z])|'
+                '(south australia)',
+          'nt': '([^A-Za-z]nt([^A-Za-z]|$))|'
+                '([^A-Za-z]n[\.,\-]t[^A-Za-z])|'
+                 '(northern territory)',
+          'wa': '([^A-Za-z]wa([^A-Za-z]|$))|'
+                '([^A-Za-z]w[\.,\-]a[^A-Za-z])|'
+                '(western australia)',
+          'act': '([^A-Za-z]act([^A-Za-z]|$))|'
+                 '([^A-Za-z]a[\.,\-]c[\.,\-]t[^A-Za-z])|'
+                 '(australian captial territory)',
+          'tas': '([^A-Za-z]tas([^A-Za-z]|$))|'
+                 '([^A-Za-z]t[\.,\-]a[\.,\-]s[^A-Za-z])|'
+                 '(tasmania)',
+          }
+
+#FEDERAL is used to indicate that a political party is a country wide
+#organisation
+FEDERAL = 'FED'
+
+#CLASSES#######################################################################
 
 
-class updateDatabase(object):
+class updateDonations(partyCoinDbase):
     """!
     This class is used to update the mysql database containing the political
     funding information. The class possesses methods that enable reading of the
@@ -51,17 +88,11 @@ class updateDatabase(object):
         The constructor for the object
         @param self The pointer for the object
         """
-        self.info_logger = logger('info.log', debug_level=debug_level)
+        #Instantiate the parent class
+        partyCoinDbase.__init__(self, debug_level=debug_level)
         self.connect_to_db()
 
-    def connect_to_db(self):
-        """!
-        This method connects to the mysql database using the parameters
-        specified within dbConfig.py
-        @param self The pointer for the object
-        """
-        self.con = mdb.connect(HOST, USER, PWORD, DBASE)
-        self.cur = self.con.cursor()
+    def prepare_for_new_data(self):
         #Drop the secondary table if it exists
         try:
             self.execute_command('DROP TABLE %s' % SECONDARY_TABLE)
@@ -105,11 +136,8 @@ class updateDatabase(object):
               'party_state)'\
               " VALUES('%s', '%s','%s','%s', '%s', '%s', '%s', %0.2f, '%s')" %\
               (SECONDARY_TABLE, year, party, donor, address, state,
-               postcode, don_type, amount, party_state)
-        #try:
+               postcode, don_type, amount, party_state.upper())
         self.execute_command(msg)
-        #except:
-        #    pdb.set_trace()
 
     def replace_old_data(self):
         """!
@@ -125,15 +153,6 @@ class updateDatabase(object):
                 raise(e)
         self.execute_command('ALTER TABLE %s RENAME %s' % (SECONDARY_TABLE,
                                                            MAIN_TABLE))
-
-    def execute_command(self, command):
-        """!
-        This method is used to execute sql commands and appropriately handling
-        logging of debug messages
-        """
-        self.info_logger.info('to db: %s' % command)
-        self.cur.execute(command)
-        self.con.commit()
 
     def import_data_from_dir(self, log_folder=None, file_extension=None):
         """!

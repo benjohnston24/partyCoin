@@ -30,7 +30,8 @@ __license__ = 'MPL v2.0'
 ##IMPORTS#####################################################################
 import dataGetter
 import dbConfig
-import updateDatabase
+import updateDonations
+import updatePartyInfo
 import compileData
 ##############################################################################
 
