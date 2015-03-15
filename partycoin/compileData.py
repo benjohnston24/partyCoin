@@ -84,14 +84,14 @@ def main(import_data_only=False, debug_level=0,
             sys.exit()
 
     #Sync the partyinfo database to the donations database
-    try:
-        partyInfo = updatePartyInfo(debug_level=debug_level)
-        partyInfo.sync_with_funds()
-        #partyInfo.update_images()
+    #try:
+    partyInfo = updatePartyInfo(debug_level=debug_level)
+        #partyInfo.sync_with_funds()
+    partyInfo.update_common_images()
 
-    except:
-        print "Unable to sync database"
-        sys.exit()
+    #except:
+    #    print "Unable to sync database"
+    #    sys.exit()
 
 
 if __name__ == "__main__":

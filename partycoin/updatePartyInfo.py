@@ -79,32 +79,68 @@ class updatePartyInfo(partyCoinDbase):
                 self.execute_command("INSERT INTO %s (party) VALUES ('%s')" %
                                      (INFO_TABLE, party))
 
-    def update_images(self):
+    def update_common_images(self):
         """!
         This method updates the image links within the party information table
         @param self The pointer for the object
         @todo Finish this
         """
         #Get the parties in the info party table
-        self.execute_command('SELECT DISTINCT party FROM %s' % INFO_TABLE)
-        party_list = self.__clean_list(self.cur.fetchall())
+        self.execute_command('SELECT * FROM %s' % INFO_TABLE)
+        info_parties = self.cur.fetchall()
+        #Clean up list
+        for party in info_parties:
+            logo = ''
+            wiki = ''
+            if ((party[1].find('Australian Democrats') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://images.duckduckgo.com/iu/?u=http%3A%2F%2F'\
+                       'www.thewire.org.au%2FStoryImages%2Fausdems.png&f=1'
+                wiki = 'https://en.wikipedia.org/wiki/Australian_Democrats'
+            elif ((party[1].find('Greens') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://upload.wikimedia.org/wikipedia/commons/thum'\
+                       'b/1/12/AustralianGreensLogo.svg/1200px-AustralianG'\
+                       'reensLogo.svg.png'
+                wiki = 'https://en.wikipedia.org/wiki/Australian_Greens'
+            elif ((party[1].find('Australian Labor Party') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://upload.wikimedia.org/wikipedia/en/thumb/7'\
+                       '/7b/Australian_Labor_Party_logo.svg/1200px-Austr'\
+                       'alian_Labor_Party_logo.svg.png'
+                wiki = 'https://en.wikipedia.org/wiki/Australian_Labor_Party'
+            elif ((party[1].find('Christian Democratic') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://upload.wikimedia.org/wikipedia/en/7/74/'\
+                       'CDPbanner.jpg'
+                wiki = 'https://en.wikipedia.org/wiki/Christian_Democr'\
+                       'atic_Party_%28Australia%29'
+            elif ((party[1].find('Liberal Party') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://upload.wikimedia.org/wikipedia/en/3/38/'\
+                       'Liberal_Party_of_Australia_logo.png'
+                wiki = 'https://en.wikipedia.org/wiki/Liberal_Party_of_'\
+                       'Australia'
+            elif ((party[1].find('National Party') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://upload.wikimedia.org/wikipedia/commons/'\
+                       '4/4d/Nationals_FRA_stacke_9013DF.jpg'
+                wiki = 'https://en.wikipedia.org/wiki/National_Party_of'\
+                       '_Australia'
+            elif ((party[1].find('One Nation') >= 0) and
+                    (party[2] == '') and (party[3] == '')):
+                logo = 'https://upload.wikimedia.org/wikipedia/en/c/c0/'\
+                       'Onenationlogo.jpg'
+                wiki = 'https://en.wikipedia.org/wiki/One_Nation_%28'\
+                       'Australia%29'
 
-        #Get the list of parties available from wikipedia
-        wiki = wikipedia.WikipediaPage(WIKI_PARTY_LIST).links
 
-        #Scroll through the party list and search for wiki links
-        for party in party_list:
-            ##@todo Add support for state branches of parties
-            for link in wiki:
-                if re.search(party, str(link)):
-                    print (party, link)
-                    images = wikipedia.WikipediaPage(link).images
-                    pdb.set_trace()
-                    for image in images:
-                        if re.search("logo|" + str(link), str(image)):
-                            pdb.set_trace()
-        pdb.set_trace()
-        #wiki_pages = wikipedia.search(
+
+
+            if((logo != '') and (wiki != '')):
+                self.execute_command("UPDATE %s SET logo='%s', wiki_page='%s'"
+                                     "WHERE party='%s'" %
+                                     (INFO_TABLE, logo, wiki, party[1]))
 
     def __clean_list(self, dirty_list):
         """!
