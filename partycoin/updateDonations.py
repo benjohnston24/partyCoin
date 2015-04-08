@@ -36,6 +36,7 @@ __license__ = 'MPL v2.0'
 from dbConfig import partyCoinDbase
 import re
 import os
+import pdb
 ##############################################################################
 #Tables used in tracking the donations made by the political parties
 MAIN_TABLE = 'funds_tracker_donation'
@@ -52,7 +53,7 @@ STATES = {'nsw': '([^A-Za-z]nsw([^A-Za-z]|$))|'
                  '(^A-Za-z]q[\.,\-]l[\.,\-]d[^A-Za-z])|'
                  '(queensland)',
           'vic': '([^A-Za-z]vic([^A-Za-z]|$))|'
-                 '([^A-Za-z]v[\.,\-]i[\.,\-]c[^A-Za-z])|' '(victoria)', 
+                 '([^A-Za-z]v[\.,\-]i[\.,\-]c[^A-Za-z])|' '(victoria)',
           'sa': '([^A-Za-z]sa([^A-Za-z]|$))|'
                 '([^A-Za-z]s[\.,\-]a[^A-Za-z])|'
                 '(south australia)',
@@ -189,10 +190,14 @@ class updateDonations(partyCoinDbase):
                         year = year[len(year) - 1][:4]
                     #The second row contains the name
                     elif (row_counter == 1):
-                        party = row.split(',')[0]
+                        party = row.split('data')[0].replace(',', '')
+                        #party = row.split(',')[0]
                         party_state = None
                         #find the state
-                        test_party = party.lower().replace('.', '')
+                        test_party = party.lower().\
+                            replace('.', '').\
+                            replace(',', '')
+
                         for state in STATES.keys():
                             #Check which state the party is from
                             if re.search(STATES[state], test_party):
@@ -205,6 +210,7 @@ class updateDonations(partyCoinDbase):
                         #level
                         if party_state is None:
                             party_state = FEDERAL
+
                     #Ignore the third row
                     elif(row_counter == 2):
                         pass
@@ -216,6 +222,7 @@ class updateDonations(partyCoinDbase):
                             extracted_data[i] = \
                                 extracted_data[i].replace('"', '').\
                                 replace("'", '')
+
                         self.add_funds_to_db(year=year,
                                              party=party,
                                              party_state=party_state,

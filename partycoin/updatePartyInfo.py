@@ -92,50 +92,40 @@ class updatePartyInfo(partyCoinDbase):
         for party in info_parties:
             logo = ''
             wiki = ''
-            if ((party[1].find('Australian Democrats') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            if (party[1].find('Australian Democrats') >= 0):
                 logo = 'https://images.duckduckgo.com/iu/?u=http%3A%2F%2F'\
                        'www.thewire.org.au%2FStoryImages%2Fausdems.png&f=1'
                 wiki = 'https://en.wikipedia.org/wiki/Australian_Democrats'
-            elif ((party[1].find('Greens') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            elif (party[1].find('Greens') >= 0):
                 logo = 'https://upload.wikimedia.org/wikipedia/commons/thum'\
                        'b/1/12/AustralianGreensLogo.svg/1200px-AustralianG'\
                        'reensLogo.svg.png'
                 wiki = 'https://en.wikipedia.org/wiki/Australian_Greens'
-            elif ((party[1].find('Australian Labor Party') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            elif (party[1].find('Australian Labor Party') >= 0):
                 logo = 'https://upload.wikimedia.org/wikipedia/en/thumb/7'\
                        '/7b/Australian_Labor_Party_logo.svg/1200px-Austr'\
                        'alian_Labor_Party_logo.svg.png'
                 wiki = 'https://en.wikipedia.org/wiki/Australian_Labor_Party'
-            elif ((party[1].find('Christian Democratic') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            elif (party[1].find('Christian Democratic') >= 0):
                 logo = 'https://upload.wikimedia.org/wikipedia/en/7/74/'\
                        'CDPbanner.jpg'
                 wiki = 'https://en.wikipedia.org/wiki/Christian_Democr'\
                        'atic_Party_%28Australia%29'
-            elif ((party[1].find('Liberal Party') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            elif (party[1].find('Liberal Party') >= 0):
                 logo = 'https://upload.wikimedia.org/wikipedia/en/3/38/'\
                        'Liberal_Party_of_Australia_logo.png'
                 wiki = 'https://en.wikipedia.org/wiki/Liberal_Party_of_'\
                        'Australia'
-            elif ((party[1].find('National Party') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            elif (party[1].find('National Party') >= 0):
                 logo = 'https://upload.wikimedia.org/wikipedia/commons/'\
                        '4/4d/Nationals_FRA_stacke_9013DF.jpg'
                 wiki = 'https://en.wikipedia.org/wiki/National_Party_of'\
                        '_Australia'
-            elif ((party[1].find('One Nation') >= 0) and
-                    (party[2] == '') and (party[3] == '')):
+            elif (party[1].find('One Nation') >= 0):
                 logo = 'https://upload.wikimedia.org/wikipedia/en/c/c0/'\
                        'Onenationlogo.jpg'
                 wiki = 'https://en.wikipedia.org/wiki/One_Nation_%28'\
                        'Australia%29'
-
-
-
 
             if((logo != '') and (wiki != '')):
                 self.execute_command("UPDATE %s SET logo='%s', wiki_page='%s'"

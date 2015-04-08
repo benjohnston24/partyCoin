@@ -86,7 +86,7 @@ def main(import_data_only=False, debug_level=0,
     #Sync the partyinfo database to the donations database
     #try:
     partyInfo = updatePartyInfo(debug_level=debug_level)
-        #partyInfo.sync_with_funds()
+    partyInfo.sync_with_funds()
     partyInfo.update_common_images()
 
     #except:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     #Command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true',
-                        default=False, help="Enable debug mode")
+                       default=False, help="Enable debug mode")
     parser.add_argument('-l', '--log', action='store_true',
                         default=False, help="Enable debug logging")
     parser.add_argument('-i', '--import_data', action='store_true',
