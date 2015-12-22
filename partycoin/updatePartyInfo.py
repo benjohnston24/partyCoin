@@ -31,7 +31,6 @@ from dbConfig import partyCoinDbase
 from updateDonations import MAIN_TABLE as DONATIONS_TABLE
 import wikipedia
 import re
-import pdb
 ##############################################################################
 #This table contains the information for each of the political parties
 INFO_TABLE = 'funds_tracker_partyinfo'

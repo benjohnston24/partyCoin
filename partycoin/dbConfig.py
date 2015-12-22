@@ -31,7 +31,7 @@ import MySQLdb as mdb
 ##############################################################################
 HOST = 'localhost'
 USER = 'partyCoin'
-PWORD = 'money'
+PWORD = 'password'
 DBASE = 'donations'
 
 #CLASSES#######################################################################

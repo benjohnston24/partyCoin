@@ -22,40 +22,41 @@ __revision__ = '1.0'
 __date__ = 'Thu Mar  5 19:27:26 AEDT 2015'
 __license__ = 'MPL v2.0'
 
-## LICENSE DETAILS############################################################
+# LICENSE DETAILS############################################################
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-##IMPORTS#####################################################################
+# IMPORTS#####################################################################
 import mechanize
 import cookielib
 from BeautifulSoup import BeautifulSoup
 from stdtoolbox.logging import logger
 import httplib
 import re
-import argparse
 import os
 ##############################################################################
 
-#Web addresses to be used
+# Web addresses to be used
 main_address = "http://periodicdisclosures.aec.gov.au/"
 locator_service = main_address + "Default.aspx"
 party_analysis_address = main_address + "AnalysisParty.aspx"
 __aec__ = "http://www.aec.gov.au"
 
-#Raw data location
+# Raw data location
 RAW_DATA = 'dat'
-#Log file extension
+# Log file extension
 FILE_EXT = '.csv'
 
 
 class dataGetter(object):
+
     """!
     This class is used to download political funding data from the australian
     electoral commission website.
 
     """
+
     def __init__(self, debug_level=1):
         """!
         The constructor for the object
@@ -69,14 +70,14 @@ class dataGetter(object):
         these are required use output redirection when calling the python
         script.
         """
-        #Logging device
+        # Logging device
         self.debug_level = debug_level
         self.info_logger = logger(file_name="dataGetter.log",
                                   debug_level=debug_level)
         # Browser
         self.info_logger.info('Construct Browser Object')
 
-        #Use HTTP version 1.0, required to download file
+        # Use HTTP version 1.0, required to download file
         httplib.HTTPConnection._http_vsn = 10
         httplib.HTTPConnection._http_vsn_str = 'HTTP/1.0'
 
@@ -88,7 +89,7 @@ class dataGetter(object):
 
         # Browser options
         self.br.set_handle_equiv(True)
-        #self.br.set_handle_gzip(True)
+        # self.br.set_handle_gzip(True)
         self.br.set_handle_redirect(True)
         self.br.set_handle_referer(True)
         self.br.set_handle_robots(False)
@@ -110,10 +111,10 @@ class dataGetter(object):
                                'Gecko/2008071615 Ubuntu/14.04.2'
                                'Firefox/3.0.1')]
 
-        #Available years of data
+        # Available years of data
         self.available_years = []
 
-        #Check the directory to log folders exists
+        # Check the directory to log folders exists
 
     def launch_funds_getter(self, log_folder=RAW_DATA):
         """!
@@ -128,55 +129,56 @@ class dataGetter(object):
         self.get_available_years()
         for year_list in self.available_years:
             self.info_logger.info('Select data for year: %s' % year_list[0])
-            #Access the main site
+            # Access the main site
             self.br.open(locator_service)
-            #Select the export form
+            # Select the export form
             self.br.select_form(predicate=lambda f:
                                 f.attrs.get('id', None) == 'formMaster')
-            #Select the year
+            # Select the year
             self.br["ctl00$dropDownListPeriod"] = [year_list[1]]
-            #Click the Go button
+            # Click the Go button
             req = self.br.click(type="submit",
                                 name="ctl00$buttonGo")
             self.br.open(req)
-            #Get party list for that year
+            # Get party list for that year
             self.get_party_list()
 
             for party in self.party_list:
 
-                #Access the main site
+                # Access the main site
                 self.br.open(party_analysis_address)
-                #Select the export form
+                # Select the export form
                 self.br.select_form(predicate=lambda f:
                                     f.attrs.get('id', None) == 'formMaster')
-                #Select the party
+                # Select the party
+
                 self.br["ctl00$ContentPlaceHolderBody$dropDownListParties"] = \
                     [party[0]]
 
-                #Scroll through each pages of data for the specified party
-                #Use the analysis button on the form
+                # Scroll through each pages of data for the specified party
+                # Use the analysis button on the form
                 req = self.br.click(type="submit",
                                     name="ctl00$ContentPlaceHolderBody"
                                     "$analysisControl$buttonExport")
 
-                #Navigate to the export menu
+                # Navigate to the export menu
                 self.br.open(req)
-                self.br.select_form(nr=2)
-                #Select a csv file
+                self.br.select_form(nr=0)
+                # Select a csv file
                 self.br["ctl00$ContentPlaceHolderBody$export"
                         "Control$dropDownListOptions"] = ['csv']
                 result = self.br.submit("ctl00$ContentPlaceHolderBody"
                                         "$exportControl$buttonExport")
                 data = result.read()
-                #Before writing the file, remove all invalid characters
+                # Before writing the file, remove all invalid characters
                 file_name = re.sub('\W+', '', party[1])
-                #Store the data as a csv file for later use
+                # Store the data as a csv file for later use
                 file_name = os.path.join(os.getcwd(), RAW_DATA,
                                          year_list[0] + '-' + file_name +
                                          '.csv')
                 with open(file_name, 'w') as f:
                     f.write(data)
-                #Log the file being written
+                # Log the file being written
                 self.info_logger.info('%s file written' % file_name)
 
     def get_available_years(self):
@@ -185,15 +187,15 @@ class dataGetter(object):
         Australian electoral commission.
         @param self The pointer for the object
         """
-        #Open the party analysis page
+        # Open the party analysis page
         page = self.br.open(locator_service)
-        #Read the page into a soup
+        # Read the page into a soup
         soup = BeautifulSoup(page.read())
-        #Get all options
+        # Get all options
         options = soup.findAll('option')
         for option in options:
             tmp_list = []
-            #Get the year value and corresponding form code
+            # Get the year value and corresponding form code
             tmp_list.append(option.text.__str__())
             tmp_list.append(option.get("value").__str__())
             self.available_years.append(tmp_list)
@@ -204,13 +206,13 @@ class dataGetter(object):
         Australian electrocal for the selected year
         @param self The pointer for the object
         """
-        #Open the party analysis page
+        # Open the party analysis page
         page = self.br.open(party_analysis_address)
-        #Read the page into the soup
+        # Read the page into the soup
         soup = BeautifulSoup(page.read())
-        #Extract the html code for the party list
+        # Extract the html code for the party list
         html_parties = soup.findAll('tr')[0].findAll('option')
-        #Create a blank list
+        # Create a blank list
         self.party_list = []
         for html_party in html_parties:
             tmp_list = []
@@ -231,14 +233,14 @@ class dataGetter(object):
         """
         trs = soup.findAll('tr')
         data = []
-        #Extract the donation information
+        # Extract the donation information
         for tr in trs:
             if tr.__str__().find('Donor.aspx') >= 0:
                 data.append(tr)
         donor_info = []
         for line in data:
             tmp_dict = {}
-            #Extract the info from the line
+            # Extract the info from the line
             info = line.findAll('td')
             tmp_dict['name'] = info[0].text.__str__()
             tmp_dict['address'] = info[1].text.__str__()
